@@ -62,6 +62,7 @@ class Crawler {
 	void contextLoads() throws IOException {
 		System.out.println("=========================");
 		System.out.println("24時まで、0分と30分に実行します。");
+		System.out.println("0分と30分以外は待機状態になります。");
 		System.out.println("=========================");
 		setUp();
 		List<Site> sites = fileService.getSites(settingFile);
