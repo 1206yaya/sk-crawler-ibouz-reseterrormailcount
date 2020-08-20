@@ -1,0 +1,56 @@
+plugins {
+	id 'org.springframework.boot' version '2.4.0-SNAPSHOT'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'java'
+}
+
+group = 'sk.crawler.ibouz.core'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// need it as useing in ibouz-library
+	runtimeOnly 'com.h2database:h2'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//CSV
+	compile group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
+	compile group: 'com.opencsv', name: 'opencsv', version: '5.2'
+
+compile group: 'com.codeborne', name: 'selenide', version: '5.12.2'
+
+	if (System.properties['env'].equals("IS_PROD")) {
+		implementation fileTree(dir: 'libs', include: '*.jar')
+	} else {
+		implementation project(':sk-crawler-ibouz-library')
+	}
+}
+
+test {
+	useJUnitPlatform()
+	systemProperties(System.getProperties())
+	// 繧ｭ繝｣繝�繧ｷ繝･繧貞炎髯､
+	delete "${rootDir}/.gradle/buildOutputCleanup/cache.properties"
+}
+
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
