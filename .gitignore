@@ -56,3 +56,4 @@ yarn-error.log*
 
 !chromedriver72.exe
 application/DEV_SETTINGS.csv
+!application/libs/*jar
