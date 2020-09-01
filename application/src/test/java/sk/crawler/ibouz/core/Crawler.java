@@ -83,6 +83,9 @@ class Crawler {
 					userSearchPage.setMailError("許可回数オーバー");
 					// 最終送信
 					userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
+					//  累計送信数
+					userSearchPage.setTotalSendingCount(1);
+					
 					UserSearchResultPage userSearchResultPage = userSearchPage.search();
 					userSearchResultPage.clickResetMallErrorCount();
 					System.out.println("=========================");
