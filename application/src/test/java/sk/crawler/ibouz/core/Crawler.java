@@ -81,8 +81,8 @@ class Crawler {
 					UserSearchPage userSearchPage = open(ibouz.getUserSearchURL(), UserSearchPage.class);
 					// メインメールエラー
 					userSearchPage.setMailError("許可回数オーバー");
-					// 最終送信
-					userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
+					// // 最終送信
+					// userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
 					//  累計送信数
 					userSearchPage.setTotalSendingCount(1);
 					
