@@ -54,6 +54,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-!chromedriver72.exe
+!chromedriver88.exe
 application/DEV_SETTINGS.csv
 !application/libs/*jar

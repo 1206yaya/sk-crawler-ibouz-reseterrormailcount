@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.WebDriverRunner;
 
 import sk.crawler.ibouz.core.config.CorePathConfig;
 import sk.crawler.ibouz.library.domain.Ibouz;
@@ -91,7 +92,7 @@ class Crawler {
 					System.out.println("=========================");
 					System.out.println(site.getName() + " " + now + " DONE");
 					System.out.println("=========================");
-					Selenide.closeWebDriver();
+					WebDriverRunner.getWebDriver().quit();
 				}
 			}
 			sleep();
