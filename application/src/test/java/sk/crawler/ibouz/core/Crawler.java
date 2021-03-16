@@ -66,6 +66,7 @@ class Crawler {
 		System.out.println("0分と30分以外は待機状態になります。");
 		System.out.println("=========================");
 		setUp();
+		boolean isFirst = true;
 		List<Site> sites = fileService.getSites(settingFile);
 		
 		while (true) {
@@ -75,13 +76,13 @@ class Crawler {
 			}
 			
 			// 30分ごとに実行したいので、0分と30分に実行するようにする
-			if (now.getMinute() == 30 || now.getMinute() == 0) {
+			if (isFirst || now.getMinute() == 30 || now.getMinute() == 0) {
 				for (Site site : sites) {
 					ibouz = IbouzBuilder.createIbouz(site);
 					ibouz.loginByPlaneText();
 					UserSearchPage userSearchPage = open(ibouz.getUserSearchURL(), UserSearchPage.class);
 					// メインメールエラー
-					userSearchPage.setMailError("許可回数オーバー");
+					userSearchPage.setMailErrorNum(1);
 					// // 最終送信
 					// userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
 					//  累計送信数
@@ -93,6 +94,7 @@ class Crawler {
 					System.out.println(site.getName() + " " + now + " DONE");
 					System.out.println("=========================");
 					WebDriverRunner.getWebDriver().quit();
+					isFirst = false;
 				}
 			}
 			sleep();
