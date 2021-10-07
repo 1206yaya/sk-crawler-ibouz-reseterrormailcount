@@ -35,7 +35,7 @@ public class FileService {
 				Site site = new Site();
 				
 				cell = record.get("name");
-				site.setName(cell);
+				site.setSitename(cell);
 				
 				cell = record.get("ip");
 				site.setIp(cell);

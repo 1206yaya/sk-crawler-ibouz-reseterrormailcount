@@ -7,15 +7,17 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.WebDriverRunner;
+import com.codeborne.selenide.junit5.ScreenShooterExtension;
 
 import sk.crawler.ibouz.core.config.CorePathConfig;
 import sk.crawler.ibouz.library.domain.Ibouz;
@@ -30,21 +32,24 @@ import sk.crawler.ibouz.service.FileService;
 
 @SpringBootTest
 class Crawler {
-
 	static Ibouz ibouz;
 	static LocalDate lastSendTimeSince;
 	static LocalDate lastSendTimeUntil;
-	
+
 	@Value("#{systemProperties['env']}")
 	CrawlerEnv env;
 
-	@Autowired WebDriverUtil webDriverUtil;
-	@Autowired FileService fileService;
-	
+	@Autowired
+	WebDriverUtil webDriverUtil;
+	@Autowired
+	FileService fileService;
+
 	private static Path settingFile;
 	LocalDate today;
 	LocalDate tomorrow;
+
 	public void setUp() throws IOException {
+		System.out.println("### START ");
 		settingFile = CorePathConfig.SETTINGS_CSV;
 		if (env == null || env.equals(CrawlerEnv.IS_DEV)) {
 			env = CrawlerEnv.IS_DEV;
@@ -55,18 +60,10 @@ class Crawler {
 		lastSendTimeSince = today.minusDays(1);
 		lastSendTimeUntil = today;
 		tomorrow = today.plusDays(1);
-
 	}
-
-	
 	@Test
 	void contextLoads() throws IOException {
-		System.out.println("=========================");
-		System.out.println("24時まで、0分と30分に実行します。");
-		System.out.println("0分と30分以外は待機状態になります。");
-		System.out.println("=========================");
 		setUp();
-		boolean isFirst = true;
 		List<Site> sites = fileService.getSites(settingFile);
 		
 		while (true) {
@@ -74,42 +71,40 @@ class Crawler {
 			if (now.isAfter(LocalDateTime.of(tomorrow, LocalTime.of(00, 00)))) {
 				break;
 			}
-			
-			// 30分ごとに実行したいので、0分と30分に実行するようにする
-			if (isFirst || now.getMinute() == 30 || now.getMinute() == 0) {
-				for (Site site : sites) {
-					ibouz = IbouzBuilder.createIbouz(site);
-					ibouz.loginByPlaneText();
-					UserSearchPage userSearchPage = open(ibouz.getUserSearchURL(), UserSearchPage.class);
-					// メインメールエラー
-					userSearchPage.setMailErrorNum(1);
-					// // 最終送信
-					// userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
-					//  累計送信数
-					userSearchPage.setTotalSendingCount(1);
-					
-					UserSearchResultPage userSearchResultPage = userSearchPage.search();
-					userSearchResultPage.clickResetMallErrorCount();
-					System.out.println("=========================");
-					System.out.println(site.getName() + " " + now + " DONE");
-					System.out.println("=========================");
-					WebDriverRunner.getWebDriver().quit();
-					isFirst = false;
-				}
+
+			for (Site site : sites) {
+				ibouz = IbouzBuilder.createIbouz(site);
+				ibouz.loginByPlaneText();
+				UserSearchPage userSearchPage = open(ibouz.getUserSearchURL(), UserSearchPage.class);
+				// メインメールエラー
+				userSearchPage.setMailErrorNum(1);
+				// // 最終送信
+				// userSearchPage.setLastSendTime(lastSendTimeSince, lastSendTimeUntil);
+				// 累計送信数
+				userSearchPage.setTotalSendingCount(1);
+				UserSearchResultPage userSearchResultPage = userSearchPage.search();
+				int totalNum = userSearchResultPage.getResultCount();
+				userSearchResultPage.clickResetMallErrorCount();
+				System.out.println("=========================");
+				System.out.println(
+						site.getSitename() + " " + now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")) + " "
+								+ totalNum + " Ids DELETE");
+				System.out.println("=========================");
+				WebDriverRunner.getWebDriver().quit();
 			}
 			sleep();
 		}
-
 	}
-	
+
 	private void login() {
 		LoginPage loginPage = open(ibouz.getLogintURL(), LoginPage.class);
 		loginPage.login(ibouz.getLoginid(), ibouz.getLoginpw());
 	}
-	
+
 	private void sleep() {
+		
 		try {
-			Thread.sleep(3000);
+			TimeUnit.MINUTES.sleep(5);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
